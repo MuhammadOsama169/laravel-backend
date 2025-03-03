@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Http\Requests;
-
+// namespace App\Http\Requests;
+namespace App\Http\Requests\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdatePostRequest extends FormRequest
+class RegisterAuthRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
+        //true will allow valdation to work. If false then it will abort and 403 unauthorized
         return true;
     }
 
@@ -22,8 +23,9 @@ class UpdatePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|max:255',
-            'body' => 'required'
+            'name' => 'required|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required'
         ];
     }
 }

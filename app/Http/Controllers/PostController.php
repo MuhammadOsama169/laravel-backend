@@ -30,19 +30,13 @@ class PostController extends Controller implements HasMiddleware
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        //validate
-        $attributes = $request->validate([
-            'title' => 'required|max:255',
-            'body' => 'required'
-        ]);
-        // return 'ok';
 
         // $post = Post::create($attributes);
 
         //looking to authenticate user before creating
-        $post = $request->user()->posts()->create($attributes);
+        $post = $request->user()->posts()->create($request->validated());
 
         return $post;
     }
@@ -71,21 +65,16 @@ class PostController extends Controller implements HasMiddleware
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post)
     {
         //laravel passes users automatically so we dont need to pass it again
         //modify is described in policy to check if user.id matches post.user_id
         //prevent unauth users to update/delete posts
         Gate::authorize('modify', $post);
 
-        //validate
-        $attributes = $request->validate([
-            'title' => 'required|max:255',
-            'body' => 'required'
-        ]);
         // return 'ok';
 
-        $post->update($attributes);
+        $post->update( $request->validated());
 
         return $post;
     }
