@@ -7,6 +7,8 @@ use App\Http\Requests\Auth\LoginAuthRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeMail;
 
 class AuthController extends Controller
 {
@@ -18,6 +20,10 @@ class AuthController extends Controller
         $user = User::create($request->validated());
         //issue token and return values
         $token = $user->createToken($request->name);
+        
+        // Dispatch the welcome email to the queue
+        Mail::to($user->email)->queue(new \App\Mail\WelcomeMail($user));
+
         return [
             'user' => $user,
             'token' => $token->plainTextToken
@@ -26,15 +32,9 @@ class AuthController extends Controller
 
     public function login(LoginAuthRequest $request)
     {
-        //validate
-        // $request->validate([
-        //     'email' => 'required|email|exists:users',
-        //     'password' => 'required'
-        // ]);
 
-        // $user = User::where('email', $request->email)->first();
         $fields = $request->validated();
-//search user table email field and find and return first match
+        //search user table email field and find and return first match
         $user = User::where('email', $fields['email'])->first();
 
 

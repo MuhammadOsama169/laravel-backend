@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-
+use App\Notifications\NewPostNotification;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 
 class PostController extends Controller implements HasMiddleware
 {
@@ -37,6 +38,16 @@ class PostController extends Controller implements HasMiddleware
 
         //looking to authenticate user before creating
         $post = $request->user()->posts()->create($request->validated());
+
+        // $exampleEmail = 'example@example.com';
+
+        // Notification::route('mail', $exampleEmail)->notify(new NewPostNotification($post));
+        
+        //notify admin that a new post is created
+        $adminUser = \App\Models\User::where('role', 'admin')->first();
+        if ($adminUser) {
+            $adminUser->notify(new \App\Notifications\NewPostNotification($post));
+        }
 
         return $post;
     }
