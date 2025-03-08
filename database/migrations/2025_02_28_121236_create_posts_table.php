@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('body');
             $table->string('avatar')->nullable();
+            $table->string('avatar_public_id')->nullable();
             $table->timestamps();
         });
     }

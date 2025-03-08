@@ -30,6 +30,7 @@ class PostController extends Controller implements HasMiddleware
     public function index()
     {
         return Post::all();
+        // return Post::paginate(10);
     }
 
     /**
@@ -39,31 +40,27 @@ class PostController extends Controller implements HasMiddleware
     {
         // Get all validated data from the request
         $data = $request->validated();
-    
+
         // Check if an avatar file was uploaded
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
-    
+
             // Upload the file to Cloudinary without transformation options
             $uploadResponse = Cloudinary::upload($file->getRealPath(), [
                 'folder' => 'public'
             ]);
-    
-     
-    
+
             // Retrieve the secure URL for the uploaded file and add it to the data array
             $data['avatar'] = $uploadResponse->getSecurePath();
+            $data['avatar_public_id'] = $uploadResponse->getPublicId();
         }
-    
+
         // Create the post using the authenticated user with the combined data
         $post = $request->user()->posts()->create($data);
-    
+
         // Notify admin that a new post is created (if an admin exists)
-        $adminUser = \App\Models\User::where('role', 'admin')->first();
-        if ($adminUser) {
-            $adminUser->notify(new \App\Notifications\NewPostNotification($post));
-        }
-    
+        event(new \App\Events\PostCreated($post));
+
         return $post;
     }
 
@@ -113,7 +110,11 @@ class PostController extends Controller implements HasMiddleware
         //laravel passes users automatically so we dont need to pass it again
         //modify is described in policy to check if user.id matches post.user_id
         Gate::authorize('modify', $post);
-
+        
+        // If the post has a Cloudinary public ID, delete the associated asset
+        if ($post->avatar_public_id) {
+            Cloudinary::destroy($post->avatar_public_id);
+        }
 
         $post->delete();
 
