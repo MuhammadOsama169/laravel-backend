@@ -6,11 +6,15 @@ use App\Models\Post;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Notifications\NewPostNotification;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Uploadcare\Configuration;
+use Uploadcare\Uploadcare\Client;
 
 class PostController extends Controller implements HasMiddleware
 {
@@ -33,22 +37,33 @@ class PostController extends Controller implements HasMiddleware
      */
     public function store(StorePostRequest $request)
     {
-
-        // $post = Post::create($attributes);
-
-        //looking to authenticate user before creating
-        $post = $request->user()->posts()->create($request->validated());
-
-        // $exampleEmail = 'example@example.com';
-
-        // Notification::route('mail', $exampleEmail)->notify(new NewPostNotification($post));
-        
-        //notify admin that a new post is created
+        // Get all validated data from the request
+        $data = $request->validated();
+    
+        // Check if an avatar file was uploaded
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+    
+            // Upload the file to Cloudinary without transformation options
+            $uploadResponse = Cloudinary::upload($file->getRealPath(), [
+                'folder' => 'public'
+            ]);
+    
+     
+    
+            // Retrieve the secure URL for the uploaded file and add it to the data array
+            $data['avatar'] = $uploadResponse->getSecurePath();
+        }
+    
+        // Create the post using the authenticated user with the combined data
+        $post = $request->user()->posts()->create($data);
+    
+        // Notify admin that a new post is created (if an admin exists)
         $adminUser = \App\Models\User::where('role', 'admin')->first();
         if ($adminUser) {
             $adminUser->notify(new \App\Notifications\NewPostNotification($post));
         }
-
+    
         return $post;
     }
 
@@ -85,7 +100,7 @@ class PostController extends Controller implements HasMiddleware
 
         // return 'ok';
 
-        $post->update( $request->validated());
+        $post->update($request->validated());
 
         return $post;
     }
