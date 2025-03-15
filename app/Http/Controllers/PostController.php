@@ -5,16 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-use App\Notifications\NewPostNotification;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Storage;
-use Uploadcare\Configuration;
-use Uploadcare\Uploadcare\Client;
+
 
 class PostController extends Controller implements HasMiddleware
 {
@@ -27,10 +23,43 @@ class PostController extends Controller implements HasMiddleware
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Post::all();
-        // return Post::paginate(10);
+
+        // Default to empty string for search and 10 for limit
+        $search = $request->input('search', '');
+        $limit = $request->input('limit', 10);
+    
+        // Start a base query
+        $query = Post::query();
+    
+        // If search is provided, apply a where condition
+        if (!empty($search)) {
+            // $query->where('title', 'like', "%{$search}%")
+            //       ->orWhere('body', 'like', "%{$search}%");
+            $query->whereAny([
+                ['title','body'],'LIKE','%{$search}%']);
+        }
+    
+        // Paginate using the limit
+        $posts = Post::latest()->paginate($limit);
+    
+        return response()->json($posts);
+
+            // Build a custom JSON response
+    // return response()->json([
+    //     'data' => $posts->items(),        // The actual records
+    //     'pagination' => [
+    //         'current_page'  => $posts->currentPage(),
+    //         'per_page'      => $posts->perPage(),
+    //         'total'         => $posts->total(),
+    //         'last_page'     => $posts->lastPage(),
+    //         'first_page_url'=> $posts->url(1),
+    //         'last_page_url' => $posts->url($posts->lastPage()),
+    //         'next_page_url' => $posts->nextPageUrl(),
+    //         'prev_page_url' => $posts->previousPageUrl(),
+    //     ],
+    // ]);
     }
 
     /**
@@ -82,7 +111,14 @@ class PostController extends Controller implements HasMiddleware
         // }
 
         // this will return just object
-        return $post;
+        // return $post;
+
+        $post->loadCount('likes');
+
+        return response()->json([
+            'post' => $post,
+            // 'likes_count' => $post->likes_count,
+        ]);
     }
 
     /**

@@ -10,11 +10,18 @@ class Post extends Model
     /** @use HasFactory<\Database\Factories\PostFactory> */
     use HasFactory;
 
-    protected $fillable = ['title','body','avatar'];
+    protected $fillable = ['title','body','avatar','comments'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
 }
