@@ -10,8 +10,12 @@ class Post extends Model
     /** @use HasFactory<\Database\Factories\PostFactory> */
     use HasFactory;
 
-    protected $fillable = ['title','body','avatar','comments'];
+    protected $fillable = ['title','body','avatar','comments','tags'];
 
+    protected $casts = [
+        'tags' => 'array',
+    ];
+    
     public function user()
     {
         return $this->belongsTo(User::class);

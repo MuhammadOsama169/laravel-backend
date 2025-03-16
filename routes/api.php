@@ -38,7 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
 
-    Route::get('profile/{userId}', [ProfileController::class, 'show']);
     Route::apiResource('posts', PostController::class);
     Route::apiResource('movies', MovieController::class);
 
@@ -52,6 +51,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('posts/{post}/like', [LikeController::class, 'store']);
     Route::delete('posts/{post}/like', [LikeController::class, 'destroy']);
 });
+
+
+Route::middleware('is_admin')->group(function(){
+    Route::get('profile/{userId}', [ProfileController::class, 'show']);
+});
+
+
 // Route::group(['middlewre'=>'auth:sanctum','prefix'=>'posts'],function(){
 
 // });
