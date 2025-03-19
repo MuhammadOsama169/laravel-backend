@@ -66,4 +66,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Like::class);
     }
+    public function workspaces()
+    {
+        return $this->hasMany(Workspace::class);
+    }
 }

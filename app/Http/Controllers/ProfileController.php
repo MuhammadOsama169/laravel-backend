@@ -15,13 +15,14 @@ class ProfileController extends Controller
     {
         // eager load relashions from user instead of lazy loading solving n1 problem
         // we use with methd for related data that isn't stored in the same table but has relshions with it so get those relashions data
-        $user = User::with(['posts', 'movies'])->findOrFail($userId);
+        $user = User::with(['posts', 'movies','workspaces'])->findOrFail($userId);
 
         $data = [
             'username' => $user->name,
             'email'    => $user->email,
             'posts'    => $user->posts,  
             'movies'   => $user->movies,  
+            'workspace'   => $user->workspaces,  
         ];
 
         return $data;

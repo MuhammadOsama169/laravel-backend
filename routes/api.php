@@ -6,6 +6,8 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WorkspaceController;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 /*
@@ -40,22 +42,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('posts', PostController::class);
     Route::apiResource('movies', MovieController::class);
-
-    // Comments
-    // For creating a comment, we use a nested route under posts
-    Route::post('posts/{post}/comments', [CommentController::class, 'store']);
-    // Other comment actions
-    Route::apiResource('comments', CommentController::class)->except(['store']);
-
     // Likes (nested under posts)
     Route::post('posts/{post}/like', [LikeController::class, 'store']);
     Route::delete('posts/{post}/like', [LikeController::class, 'destroy']);
-});
+
+    // Comments
+    Route::apiResource('comments', CommentController::class)->except(['store']);
+    // For creating a comment, we use a nested route under posts
+    Route::post('posts/{post}/comments', [CommentController::class, 'store']);
+    // Other comment actions
 
 
-Route::middleware('is_admin')->group(function(){
+    //workspace
+    Route::apiResource('/workspace', WorkspaceController::class)->except(['destroy']);
+    Route::delete('/workspace/{workspace}', [WorkspaceController::class, 'destroy']);
     Route::get('profile/{userId}', [ProfileController::class, 'show']);
 });
+
+
+// Route::middleware('is_admin')->group(function () {
+//     Route::get('profile/{userId}', [ProfileController::class, 'show']);
+// });
 
 
 // Route::group(['middlewre'=>'auth:sanctum','prefix'=>'posts'],function(){
