@@ -54,8 +54,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     //workspace
+    Route::apiResource('/workspace', WorkspaceController::class)->except(['destroy','massDestroy']);
     Route::apiResource('/workspace', WorkspaceController::class)->except(['destroy']);
     Route::delete('/workspace/{workspace}', [WorkspaceController::class, 'destroy']);
+
+    Route::delete('/workspace/mass-destroy', [WorkspaceController::class, 'massDestroy']);
+    Route::patch('/workspace/{workspace}/setting', [WorkspaceController::class, 'updateSetting']);
+    
     Route::get('profile/{userId}', [ProfileController::class, 'show']);
 });
 

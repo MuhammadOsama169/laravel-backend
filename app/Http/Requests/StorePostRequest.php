@@ -26,7 +26,7 @@ class StorePostRequest extends FormRequest
             'body'  => 'required|string',
             'avatar' => 'nullable|image|file|max:1000|mimes:webp,png,jpeg,jpg',
             'tags'  => 'nullable|array',
-            'tags.*' => 'string', // Each item in the tags array must be a string
+            'tags.*' => 'string', 
         ];
     }
 }
