@@ -22,4 +22,8 @@ class Workspace extends Model
     {
         return $this->hasMany(AuditLog::class, 'model_id')->where('model', 'Workspace');
     }
+    public function allowedCountries()
+    {
+        return $this->hasMany(AllowedCountry::class);
+    }
 }

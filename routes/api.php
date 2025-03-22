@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AllowedCountryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\MovieController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkspaceController;
+use App\Models\AllowedCountry;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +62,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::delete('/workspace/mass-destroy', [WorkspaceController::class, 'massDestroy']);
     Route::patch('/workspace/{workspace}/setting', [WorkspaceController::class, 'updateSetting']);
+    
+    
+    Route::prefix('workspace/{workspace}/setting')->group(function () {
+        Route::apiResource('allowed_countries', AllowedCountryController::class);
+    });
+    
     
     Route::get('profile/{userId}', [ProfileController::class, 'show']);
 });
